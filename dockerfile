@@ -1,19 +1,15 @@
-FROM --platform=linux/amd64 runpod/worker-comfyui:5.4.1-base
+FROM runpod/worker-comfyui:5.4.1-base
 
-# Install unzip (optional for future needs)
-RUN apt-get update && apt-get install -y unzip \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install selected custom nodes via comfy-cli
+# Install your selected custom nodes via comfy-cli
 RUN comfy-node-install \
-    comfyui-essentials \
+    comfyui_essentials \
     comfyui-impact-pack \
     comfyui-inpaint-cropandstitch \
     comfyui-kjnodes \
     rgthree-comfy \
     teacache
 
-# Download models at build time into correct folders
+# Download models at build time from Hugging Face
 
 # CLIP
 RUN comfy model download \

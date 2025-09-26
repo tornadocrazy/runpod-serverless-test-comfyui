@@ -1,5 +1,7 @@
 FROM runpod/worker-comfyui:5.4.1-base
 
+RUN pip install insightface onnxruntime-gpu==1.20.0
+
 # Install your selected custom nodes via comfy-cli
 RUN comfy-node-install \
     comfyui_essentials \

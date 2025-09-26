@@ -8,8 +8,9 @@ RUN comfy-node-install \
     comfyui-kjnodes \
     rgthree-comfy \
     teacache \
-    ComfyUI-ReActor \
-    ComfyUI-Inspyrenet-Rembg
+    comfyui-reactor \
+    comfyui-reactor \
+    comfyui-inspyrenet-rembg
 
 # Download models at build time from Hugging Face
 

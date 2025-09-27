@@ -1,10 +1,7 @@
 FROM runpod/worker-comfyui:5.4.1-base
 
 # Install build tools so insightface can compile on Py3.12
-RUN apt-get update && apt-get install -y build-essential
-
-# Pin exact versions for ReActor compatibility
-RUN pip install insightface==0.7.3 onnxruntime-gpu==1.20.0
+RUN pip install insightface==0.7.3 --extra-index-url https://download.pytorch.org/whl/cu124
 
 # Install your selected custom nodes via comfy-cli
 RUN comfy-node-install \

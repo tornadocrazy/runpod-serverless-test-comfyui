@@ -11,8 +11,8 @@ RUN comfy-node-install \
     rgthree-comfy \
     teacache \
     comfyui-reactor \
-    comfyui-reactor-node \
-    comfyui-inspyrenet-rembg
+    comfyui-rmbg
+
 
 # Download models at build time from Hugging Face
 
@@ -103,8 +103,10 @@ RUN comfy model download \
     --filename w600k_r50.onnx
 
 RUN comfy model download \
-    --url https://github.com/plemeri/transparent-background/releases/download/1.2.12/ckpt_fast.pth \
-    --relative-path models/transparent-background \
-    --filename ckpt_fast.pth
+    --url https://huggingface.co/1038lab/BiRefNet/resolve/9efd66ba79bd1d4426c777d71c4aa007e445b9da/BiRefNet-general.safetensors \
+    --relative-path models/RMBG/BiRefNet \
+    --filename BiRefNet-general.safetensors
+
+
 
 

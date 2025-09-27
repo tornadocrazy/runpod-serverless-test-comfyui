@@ -1,6 +1,6 @@
 FROM runpod/worker-comfyui:5.4.1-base
 
-RUN pip install insightface onnxruntime-gpu==1.20.0
+RUN pip install insightface==0.7.3 onnxruntime-gpu==1.20.0
 
 RUN cd /comfyui/custom_nodes && \
     git clone https://github.com/Gourieff/ComfyUI-ReActor.git

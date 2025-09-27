@@ -2,6 +2,12 @@ FROM runpod/worker-comfyui:5.4.1-base
 
 RUN pip install insightface onnxruntime-gpu==1.20.0
 
+RUN cd /comfyui/custom_nodes && \
+    git clone https://github.com/Gourieff/ComfyUI-ReActor.git
+
+# install its Python deps (will include correct insightface version)
+RUN pip install -r /comfyui/custom_nodes/ComfyUI-ReActor/requirements.txt
+
 # Install your selected custom nodes via comfy-cli
 RUN comfy-node-install \
     comfyui_essentials \
@@ -10,7 +16,6 @@ RUN comfy-node-install \
     comfyui-kjnodes \
     rgthree-comfy \
     teacache \
-    comfyui-reactor \
     comfyui-inspyrenet-rembg
 
 # Download models at build time from Hugging Face

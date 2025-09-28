@@ -49,7 +49,7 @@ RUN comfy model download \
 # Extra FLUX model (Turbo Alpha)
 RUN comfy model download \
     --url https://huggingface.co/camenduru/FLUX.1-dev/resolve/fc63f3204a12362f98c04bc4c981a06eb9123eee/FLUX.1-Turbo-Alpha.safetensors \
-    --relative-path models/diffusion_models \
+    --relative-path models/loras \
     --filename FLUX.1-Turbo-Alpha.safetensors
 
 RUN comfy model download \

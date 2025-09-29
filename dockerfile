@@ -14,7 +14,9 @@ RUN comfy-node-install \
     comfyui-rmbg
 
 
-# Download models at build time from Hugging Face
+# Replace sfw
+COPY reactor_sfw.py /comfyui/custom_nodes/comfyui-reactor/scripts/reactor_sfw.py
+
 
 # CLIP
 RUN comfy model download \
@@ -51,26 +53,6 @@ RUN comfy model download \
     --url https://huggingface.co/camenduru/FLUX.1-dev/resolve/fc63f3204a12362f98c04bc4c981a06eb9123eee/FLUX.1-Turbo-Alpha.safetensors \
     --relative-path models/loras \
     --filename FLUX.1-Turbo-Alpha.safetensors
-
-
-# --------------------------------------------------------------------
-# 🔹 NSFW detector
-RUN comfy model download \
-    --url https://huggingface.co/liuhaotian/nsfw_detector/resolve/main/config.json \
-    --relative-path models/nsfw_detector/vit-base-nsfw-detector \
-    --filename config.json
-
-RUN comfy model download \
-    --url https://huggingface.co/liuhaotian/nsfw_detector/resolve/main/model.safetensors \
-    --relative-path models/nsfw_detector/vit-base-nsfw-detector \
-    --filename model.safetensors
-
-RUN comfy model download \
-    --url https://huggingface.co/liuhaotian/nsfw_detector/resolve/main/preprocessor_config.json \
-    --relative-path models/nsfw_detector/vit-base-nsfw-detector \
-    --filename preprocessor_config.json
-
-
 
 # 🔹 InsightFace (buffalo_l full pack)
 RUN comfy model download \

@@ -126,12 +126,12 @@ RUN comfy model download \
 # --------------------------------------------------------------------
 # 🔹 BiRefNet RMBG
 RUN comfy model download \
-    --url https://huggingface.co/1038lab/BiRefNet/resolve/main/birefnet.py \
+    --url https://huggingface.co/1038lab/BiRefNet/raw/main/birefnet.py \
     --relative-path models/RMBG/BiRefNet \
     --filename birefnet.py
 
 RUN comfy model download \
-    --url https://huggingface.co/1038lab/BiRefNet/resolve/main/BiRefNet_config.py \
+    --url https://huggingface.co/1038lab/BiRefNet/raw/main/BiRefNet_config.py \
     --relative-path models/RMBG/BiRefNet \
     --filename BiRefNet_config.py
 

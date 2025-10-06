@@ -123,7 +123,7 @@ RUN comfy model download \
     --filename config.json
 
 RUN comfy model download \
-    --url https://huggingface.co/1038lab/BiRefNet/resolve/main/BiRefNet-general.safetensors \
+    --url https://huggingface.co/1038lab/BiRefNet/resolve/main/BiRefNet-HR.safetensors \
     --relative-path models/RMBG/BiRefNet \
     --filename BiRefNet-general.safetensors
 

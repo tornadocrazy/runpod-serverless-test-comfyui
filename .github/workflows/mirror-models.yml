@@ -1,0 +1,170 @@
+name: Mirror models to HF
+
+on:
+  workflow_dispatch:
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      # Need ~25 GB free; default runner has ~14 GB. Reclaim aggressively.
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install huggingface_hub + hf_transfer + requests
+        run: pip install --upgrade huggingface_hub hf_transfer requests
+
+      - name: Mirror files into techwavelaps/aceplus-face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_HUB_ENABLE_HF_TRANSFER: "1"
+        run: |
+          python <<'PY'
+          import os, shutil, requests
+          from huggingface_hub import (
+              hf_hub_download, upload_file, list_repo_files, login, create_repo,
+          )
+
+          login(token=os.environ["HF_TOKEN"])
+
+          TARGET = "techwavelaps/aceplus-face"
+          create_repo(TARGET, repo_type="model", exist_ok=True, private=False)
+
+          # HF sources: (source_repo, source_filename, target_path_in_repo, revision_or_None)
+          HF_SOURCES = [
+              ("comfyanonymous/flux_text_encoders",
+               "clip_l.safetensors",
+               "clip/clip_l.safetensors",
+               None),
+              ("jackzheng/flux-fill-FP8",
+               "fluxFillFP8_v10.safetensors",
+               "diffusion_models/fluxFillFP8_v10.safetensors",
+               None),
+              ("ali-vilab/ACE_Plus",
+               "portrait/comfyui_portrait_lora64.safetensors",
+               "loras/comfyui_portrait_lora64.safetensors",
+               None),
+              ("comfyanonymous/flux_text_encoders",
+               "t5xxl_fp16.safetensors",
+               "text_encoders/t5/t5xxl_fp16.safetensors",
+               None),
+              ("lovis93/testllm",
+               "ae.safetensors",
+               "vae/ae.safetensors",
+               "ed9cf1af7465cebca4649157f118e331cf2a084f"),
+              ("camenduru/FLUX.1-dev",
+               "FLUX.1-Turbo-Alpha.safetensors",
+               "loras/FLUX.1-Turbo-Alpha.safetensors",
+               "fc63f3204a12362f98c04bc4c981a06eb9123eee"),
+              ("ziixzz/codeformer-v0.1.0.pth",
+               "codeformer-v0.1.0.pth",
+               "facerestore_models/codeformer-v0.1.0.pth",
+               None),
+              ("kaliansh/sdrep",
+               "GFPGANv1.3.pth",
+               "facerestore_models/GFPGANv1.3.pth",
+               "690b63ac431cf8bed0998332079e926f845e7628"),
+              ("gmk123/GFPGAN",
+               "GFPGANv1.4.pth",
+               "facerestore_models/GFPGANv1.4.pth",
+               None),
+              ("akhaliq/GPEN-BFR-512",
+               "GPEN-BFR-512.pth",
+               "facerestore_models/GPEN-BFR-512.pth",
+               None),
+              ("ezioruan/inswapper_128.onnx",
+               "inswapper_128.onnx",
+               "insightface/inswapper_128.onnx",
+               None),
+              ("1038lab/BiRefNet",
+               "birefnet.py",
+               "RMBG/BiRefNet/birefnet.py",
+               None),
+              ("1038lab/BiRefNet",
+               "BiRefNet_config.py",
+               "RMBG/BiRefNet/BiRefNet_config.py",
+               None),
+              ("1038lab/BiRefNet",
+               "config.json",
+               "RMBG/BiRefNet/config.json",
+               None),
+              ("1038lab/BiRefNet",
+               "BiRefNet-HR.safetensors",
+               "RMBG/BiRefNet/BiRefNet-general.safetensors",
+               None),
+          ]
+
+          # Raw URLs (GitHub releases) — (url, target_path_in_repo)
+          URL_SOURCES = [
+              ("https://github.com/deepinsight/insightface/releases/download/v0.7/buffalo_l.zip",
+               "insightface/models/buffalo_l.zip"),
+              ("https://github.com/xinntao/facexlib/releases/download/v0.1.0/detection_Resnet50_Final.pth",
+               "facedetection/detection_Resnet50_Final.pth"),
+              ("https://github.com/sczhou/CodeFormer/releases/download/v0.1.0/parsing_parsenet.pth",
+               "facedetection/parsing_parsenet.pth"),
+          ]
+
+          existing = set(list_repo_files(TARGET))
+          print(f"Existing files in {TARGET}: {sorted(existing)}")
+
+          tmp_dir = "/tmp/hf_mirror"
+          os.makedirs(tmp_dir, exist_ok=True)
+
+          def push(local_path, tgt_path, src_desc):
+              size_gb = os.path.getsize(local_path) / (1024**3)
+              print(f"  downloaded {size_gb:.2f} GB -> {local_path}")
+              upload_file(
+                  path_or_fileobj=local_path,
+                  path_in_repo=tgt_path,
+                  repo_id=TARGET,
+                  repo_type="model",
+                  commit_message=f"Add {tgt_path} from {src_desc}",
+              )
+              print(f"  uploaded to {TARGET}/{tgt_path}")
+              shutil.rmtree(tmp_dir, ignore_errors=True)
+              os.makedirs(tmp_dir, exist_ok=True)
+
+          for src_repo, src_path, tgt_path, revision in HF_SOURCES:
+              if tgt_path in existing:
+                  print(f"SKIP (already in target): {tgt_path}")
+                  continue
+              rev_tag = f"@{revision[:7]}" if revision else ""
+              print(f"\n=== HF {src_repo}{rev_tag} :: {src_path} -> {TARGET}/{tgt_path} ===")
+              local = hf_hub_download(
+                  repo_id=src_repo,
+                  filename=src_path,
+                  revision=revision,
+                  local_dir=tmp_dir,
+                  local_dir_use_symlinks=False,
+              )
+              push(local, tgt_path, f"{src_repo}{rev_tag}")
+
+          for url, tgt_path in URL_SOURCES:
+              if tgt_path in existing:
+                  print(f"SKIP (already in target): {tgt_path}")
+                  continue
+              print(f"\n=== URL {url} -> {TARGET}/{tgt_path} ===")
+              local = os.path.join(tmp_dir, os.path.basename(tgt_path))
+              with requests.get(url, stream=True, timeout=300) as r:
+                  r.raise_for_status()
+                  with open(local, "wb") as f:
+                      for chunk in r.iter_content(chunk_size=1024 * 1024):
+                          if chunk:
+                              f.write(chunk)
+              push(local, tgt_path, url)
+
+          print("\nDONE")
+          PY

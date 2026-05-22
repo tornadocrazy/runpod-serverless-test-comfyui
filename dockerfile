@@ -3,15 +3,24 @@ FROM runpod/worker-comfyui:5.4.1-base
 RUN pip install https://huggingface.co/iwr-redmond/linux-wheels/resolve/main/insightface-0.7.3-cp312-cp312-linux_x86_64.whl onnxruntime-gpu==1.20.0
 
 # Install your selected custom nodes via comfy-cli
+# NOTE: comfyui-kjnodes pinned manually below — latest requires `wrap_attn`
+# from a newer ComfyUI core than the 5.4.1-base image ships.
 RUN comfy-node-install \
     comfyui_essentials \
     comfyui-impact-pack \
     comfyui-inpaint-cropandstitch \
-    comfyui-kjnodes \
     rgthree-comfy \
     teacache \
     comfyui-reactor \
     comfyui-rmbg
+
+# Pin comfyui-kjnodes to last commit before sageattn/wrap_attn refactor
+# (1585f9b on 2025-11-05 broke compatibility with ComfyUI 0.3.57)
+RUN cd /comfyui/custom_nodes && \
+    git clone https://github.com/kijai/ComfyUI-KJNodes.git comfyui-kjnodes && \
+    cd comfyui-kjnodes && \
+    git checkout e64b67b8f4aa3a555cec61cf18ee7d1cfbb3e5f0 && \
+    pip install -r requirements.txt
 
 
 # Replace sfw
